@@ -1,0 +1,150 @@
+//
+//  ViewController.swift
+//  Gestures_9
+//
+//  Created by student on 2018/11/24.
+//  Copyright ? 2018年 李琳. All rights reserved.
+//
+
+import UIKit
+
+class ViewController: UIViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+    }
+
+    @IBAction func add(_ sender: Any) {
+        //随机产生方块
+        let x = Int(arc4random()) % Int(self.view.bounds.width)
+        let y = Int(arc4random()) % Int(self.view.bounds.height)
+        
+        let label = UILabel(frame: CGRect(x: x, y: y, width: 30, height: 30))
+        label.text = "A"
+        label.textAlignment = .center
+        label.backgroundColor = UIColor.red
+        
+        //添加阴影
+                label.layer.shadowColor = UIColor.gray.cgColor
+                label.layer.shadowOffset = CGSize(width: 10, height: 10)
+                label.layer.shadowOpacity = 1
+        self.view.addSubview(label)
+        
+        
+        
+    }
+    
+    @IBAction func move(_ sender: Any) {
+        for label in self.view.subviews {
+            if label is UILabel {
+                UIView.animate(withDuration: 1) {
+                    let x = Int(arc4random()) % Int(self.view.bounds.width)
+                    let y = Int(arc4random()) % Int(self.view.bounds.height)
+                    //label.center = CGPoint(x: x, y: y)
+                    label.center.x = CGFloat(x)
+                    label.center.x = CGFloat(y)
+                }
+            }
+        }
+    }
+    @IBAction func del(_ sender: Any) {
+        for label in self.view.subviews {
+            if label is UILabel {
+                label.removeFromSuperview()
+            }
+        }
+    }
+}
+
+
+
+//
+//  CirlView.swift
+//  Gestures_9
+//
+//  Created by student on 2018/11/24.
+//  Copyright ? 2018年 李琳. All rights reserved.
+//
+
+import UIKit
+
+@IBDesignable
+class CirlView: UIView {
+
+    @IBInspectable var fillColor:UIColor?
+    @IBInspectable var strokeColor: UIColor?
+    
+    
+    func setup()  {
+        let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(pan(recognizer:)))
+        self.addGestureRecognizer(panRecognizer)
+        
+        let pinchRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(pinch(recognizer:)))
+        self.addGestureRecognizer(pinchRecognizer)
+        
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(tap(recognizer:)))
+        self.addGestureRecognizer(tapRecognizer)
+    }
+    
+    @objc func tap(recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .changed:
+            fallthrough
+        case .ended:
+            print("double clicked me")
+        default:
+            break
+        }
+    }
+    
+    @objc func pinch(recognizer: UIPinchGestureRecognizer) {//产生两个s手指控制功能，类适于两手放大和缩小
+        switch recognizer.state {
+        case .changed:
+            fallthrough
+        case .ended:
+            bounds.size = CGSize(width: bounds.width * recognizer.scale, height: bounds.height * recognizer.scale)//可以产生放大放小
+            recognizer.scale = 1
+        default:
+            break
+        }
+    }
+    @objc func pan(recognizer: UIPanGestureRecognizer) {
+        //print("pan")
+        switch recognizer.state {
+        case .changed:
+            fallthrough
+        case .ended:
+            let translation = recognizer.translation(in: self)
+            center.x += translation.x
+            center.y += translation.y
+            recognizer.setTranslation(.zero, in: self)//跟随鼠标移动
+        default:
+            break
+        }
+    }
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setup()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        setup()
+    }
+    
+    // Only override draw() if you perform custom drawing.
+    // An empty implementation adversely affects performance during animation.
+    
+    //画椭圆
+    override func draw(_ rect: CGRect) {
+        // Drawing code
+        let path = UIBezierPath(ovalIn: rect)
+        fillColor?.setFill()
+        strokeColor?.setStroke()
+        path.fill()
+        path.stroke()
+    }
+    
+
+}
